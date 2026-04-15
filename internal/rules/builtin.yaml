@@ -1,0 +1,97 @@
+rules:
+  - id: debug_mode
+    name: Режим отладки включен
+    severity: LOW
+    description: Логирование в режиме отладки раскрывает детали внутреннего устройства приложения
+    recommendation: Смените уровень логирования на info или error в production-среде
+    conditions:
+      - path: "$.debug"
+        operator: eq
+        value: true
+      - path: "$.log.level"
+        operator: eq
+        value: debug
+      - path: "$.log.level"
+        operator: eq
+        value: DEBUG
+      - path: "$.app.mode"
+        operator: eq
+        value: debug
+      - path: "$.verbose"
+        operator: eq
+        value: true
+
+  - id: plaintext_password
+    name: Пароль в открытом виде
+    severity: HIGH
+    description: Пароль или секрет хранится в конфигурации в открытом виде
+    recommendation: Используйте переменные окружения или менеджер секретов (Vault, AWS Secrets)
+    conditions:
+      - path: "*"
+        operator: regex_key
+        value: "(?i)(password|pass|pwd|secret|api_key|token|jwt_secret)"
+        and_value_not_empty: true
+        exclude_value_regex: "(?i)^[A-Z_][A-Z0-9_]*$"
+
+  - id: wildcard_host
+    name: Привязан к 0.0.0.0 без ограничений
+    severity: MEDIUM
+    description: Приложение доступно со всех сетевых интерфейсов
+    recommendation: Используйте 127.0.0.1 для локального доступа или добавьте белый список IP и firewall
+    conditions:
+      - path: "$.host"
+        operator: eq
+        value: "0.0.0.0"
+      - path: "$.bind"
+        operator: eq
+        value: "0.0.0.0"
+      - path: "$.server.host"
+        operator: eq
+        value: "0.0.0.0"
+      - path: "$.storage.host"
+        operator: eq
+        value: "0.0.0.0"
+      - path: "$.database.host"
+        operator: eq
+        value: "0.0.0.0"
+      - path: "$.db.host"
+        operator: eq
+        value: "0.0.0.0"
+      - path: "$.listen"
+        operator: contains
+        value: "0.0.0.0"
+      - path: "$.address"
+        operator: eq
+        value: "0.0.0.0"
+
+  - id: tls_disabled
+    name: Проверка TLS отключена
+    severity: HIGH
+    description: Отключена проверка SSL/TLS сертификатов, уязвимость для MITM-атак
+    recommendation: "Включите проверку TLS, установите insecure_skip_verify: false или verify_ssl: true"
+    conditions:
+      - path: "$.http.tls.insecure_skip_verify"
+        operator: eq
+        value: true
+      - path: "$.client.verify_ssl"
+        operator: eq
+        value: false
+      - path: "$.tls_config.disable_verification"
+        operator: eq
+        value: true
+      - path: "$.insecure_skip_verify"
+        operator: eq
+        value: true
+      - path: "$.tls_verify"
+        operator: eq
+        value: false
+
+  - id: weak_algorithms
+    name: Слабый криптографический алгоритм
+    severity: HIGH
+    description: Обнаружен устаревший или небезопасный алгоритм
+    recommendation: Используйте SHA-256 или SHA-512 для хеширования, AES-256 для шифрования, TLS 1.2 или выше
+    conditions:
+      - path: "*"
+        operator: regex_value
+        value: "(?i)(MD5|SHA1|DES|3DES|RC4|TLSv1\\.0|TLSv1\\.1|RSA-SHA1|NULL cipher|export-grade)"

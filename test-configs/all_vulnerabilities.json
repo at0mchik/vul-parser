@@ -1,0 +1,26 @@
+{
+  "debug": true,
+  "log": {
+    "level": "debug"
+  },
+  "database": {
+    "password": "admin123",
+    "host": "localhost"
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 3000
+  },
+  "http": {
+    "tls": {
+      "insecure_skip_verify": true
+    }
+  },
+  "security": {
+    "hash_algorithm": "MD5",
+    "cipher": "DES"
+  },
+  "api": {
+    "secret_key": "sk_test_12345"
+  }
+}

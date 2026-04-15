@@ -1,0 +1,20 @@
+{
+  "password": "",
+  "log": {
+    "level": "DEBUG"
+  },
+  "listen": "0.0.0.0:8080",
+  "tls_verify": false,
+  "hash": "sha1",
+  "nested": {
+    "deeply": {
+      "nested": {
+        "api_token": "token_123"
+      }
+    }
+  },
+  "array": [
+    {"cipher": "RC4"},
+    {"algo": "MD5"}
+  ]
+}

@@ -1,0 +1,17 @@
+version: 2.0
+app:
+  mode: debug
+  verbose: true
+
+storage:
+  type: postgres
+  password: postgres123
+  host: 0.0.0.0
+
+client:
+  verify_ssl: false
+
+tls_config:
+  min_version: TLSv1.0
+  cipher_suites:
+    - TLS_RSA_WITH_3DES_EDE_CBC_SHA
