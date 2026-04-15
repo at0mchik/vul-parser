@@ -13,15 +13,32 @@
 - Расширяемая система правил через YAML-конфигурацию
 - Режим silent (не выходить с ошибкой)
 
-## Установка
+## Установка и билд CLI-утилиты
 
 ```bash
 git clone https://github.com/at0mchik/vul-parser
 cd vul-parser
-go build -o vul_parser ./cmd/vul_parser
+go build -o vul_parser ./cmd/parser
 ```
 
-## Использование
+## Установка, билд и запуск сервера
+
+```bash
+git clone https://github.com/at0mchik/vul-parser
+cd vul-parser
+go build -o vul_server ./cmd/server
+./vul_server
+```
+
+## Установка, билд и запуск сервера с использованием докера
+
+```bash
+git clone https://github.com/at0mchik/vul-parser
+cd vul-parser
+docker-compose -f docker/docker-compose-hmr.yml up -d   
+```
+
+## Использование CLI-утилиты
 
 ```bash
 # Анализ файла
@@ -59,7 +76,7 @@ Enter configuration (press Ctrl+D on empty line to finish):
 cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 ```
 
-## Флаги
+## Флаги CLI-утилиты
 | Флаг | Описание |
 | --- | --- |
 | `-s`, `--silent` |  Не выходить с ошибкой при наличии уязвимостей |
