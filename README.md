@@ -18,7 +18,7 @@
 ```bash
 git clone https://github.com/at0mchik/vul-parser
 cd vul-parser
-go build -o vul_parser ./cmd/app
+go build -o vul_parser ./cmd/vul_parser
 ```
 
 ## Использование
@@ -121,30 +121,30 @@ cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 vul_parser/
 ├── cmd/
 │   └── vul_parser/
-│       └── main.go                         # Точка входа
+│       └── main.go                # Точка входа
 ├── internal/
 │   ├── domain/models
-│   │   ├── vulnerability.go            # Модель уязвимости
-│   │   └── rule.go                     # Модель правила
+│   │   ├── vulnerability.go       # Модель уязвимости
+│   │   └── rule.go                # Модель правила
 │   ├── config/
-│   │   └── flags.go                    # Парсинг флагов
+│   │   └── flags.go               # Парсинг флагов
 │   ├── rules/
-│   │   ├── loader.go                   # Загрузчик правил
-│   │   └── builtin.yaml                # Встроенные правила
+│   │   ├── loader.go              # Загрузчик правил
+│   │   └── builtin.yaml           # Встроенные правила
 │   ├── parser/
-│   │   └── parser.go                   # Парсер JSON/YAML
+│   │   └── parser.go              # Парсер JSON/YAML
 │   ├── checker/
-│   │   └── checker.go                  # Движок проверки
+│   │   └── checker.go             # Движок проверки
 │   ├── output/
-│   │   └── printer.go                  # Вывод результатов
-│   ├── permission/
-│   │   └── checker.go             # Проверка прав доступа
-|   |
-│   └── test-configs                    # Готовые конфиги для тестирования
-│       ├── all_vulnerabilites.json     # Конфиг со всеми уязвимостями
-│       ├── edge_cases.json             # Конфиг с граничными случаями
-|       ├── no_vulnerabilites.json      # Конфиг без уязвимостей
-|       └── partial_vulnerabilites.yaml # Конфиг формата YAML
+│   │   └── printer.go             # Вывод результатов
+│   └── permission/
+│       └── checker.go             # Проверка прав доступа
+|   
+├── test-configs                    # Готовые конфиги для тестирования
+│   ├── all_vulnerabilites.json     # Конфиг со всеми уязвимостями
+│   ├── edge_cases.json             # Конфиг с граничными случаями
+|   ├── no_vulnerabilites.json      # Конфиг без уязвимостей
+|   └── partial_vulnerabilites.yaml # Конфиг формата YAML
 ├── go.mod
 ├── go.sum
 └── README.md

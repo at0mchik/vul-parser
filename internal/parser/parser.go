@@ -72,3 +72,7 @@ func ReadFromReader(r io.Reader) ([]byte, error) {
 	// Неинтерактивный режим (pipe или redirection)
 	return io.ReadAll(r)
 }
+
+func ReadFromFile(filePath string) ([]byte, error) {
+	return os.ReadFile(filePath)
+}
