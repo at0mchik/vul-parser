@@ -15,12 +15,15 @@ func NewChecker(rules []models.Rule) *Checker {
 	return &Checker{rules: rules}
 }
 
-func (c *Checker) Check(data interface{}) []models.Vulnerability {
+func (c *Checker) Check(data interface{}, filePath string) []models.Vulnerability {
 	var vulnerabilities []models.Vulnerability
 	
 	for _, rule := range c.rules {
 		for _, cond := range rule.Conditions {
 			vulns := c.evaluateCondition(data, cond, rule)
+			for i := range vulns {
+				vulns[i].FilePath = filePath
+			}
 			vulnerabilities = append(vulnerabilities, vulns...)
 		}
 	}
@@ -56,7 +59,6 @@ func (c *Checker) matchesCondition(path string, value interface{}, cond models.C
 		return false
 	}
 	
-	// новое: исключить значения, подходящие под regex
 	if cond.ExcludeValueRegex != "" {
 		if c.regexMatch(fmt.Sprintf("%v", value), cond.ExcludeValueRegex) {
 			return false
@@ -139,7 +141,6 @@ func (c *Checker) walk(data interface{}, prefix string, fn func(string, interfac
 			c.walk(val, newPath, fn)
 		}
 	default:
-		// leaf value already handled by parent
 	}
 }
 
