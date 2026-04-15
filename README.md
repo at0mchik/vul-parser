@@ -4,8 +4,10 @@
 
 ## Возможности
 
-- Анализ `JSON` и `YAML` конфигураций
+- Анализ JSON и YAML конфигураций
 - Поиск 5 типов уязвимостей (с возможностью расширения)
+- Проверка прав доступа к файлам конфигураций
+- Рекурсивный анализ директорий
 - Цветной вывод с уровнями опасности (LOW/MEDIUM/HIGH)
 - Поддержка stdin для конвейерной обработки
 - Расширяемая система правил через YAML-конфигурацию
@@ -28,13 +30,20 @@ go build -o vul_parser ./cmd/app
 # Анализ YAML файла
 ./vul_parser config.yaml
 
+# Рекурсивный анализ директории
+./vul_parser -r ./configs/
+./vul_parser --recursive ./configs/
+
+# Анализ директории без рекурсии (только корень)
+./vul_parser ./configs/
+
 # Чтение из stdin
 cat config.json | ./vul_parser --stdin
 ./vul_parser --stdin < config.json
 
 # Интерактивный ввод (Ctrl+D для завершения)
 ./vul_parser --stdin
-Enter Введите конфигурацию (нажмите Ctrl+D на пустой строке для окончания ввода):
+Enter configuration (press Ctrl+D on empty line to finish):
 {"debug": true, "password": "secret"}
 # нажмите Ctrl+D
 
@@ -46,6 +55,7 @@ Enter Введите конфигурацию (нажмите Ctrl+D на пус
 ./vul_parser --rules my_rules.yaml config.json
 
 # Комбинирование флагов
+./vul_parser -r -s --rules custom.yaml ./configs/
 cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 ```
 
@@ -97,6 +107,14 @@ cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 
 - Пример: `{"security": {"hash_algorithm": "MD5"}}`
 
+### 6. Слишком широкие права доступа (MEDIUM/HIGH)
+
+- HIGH (777, 666): любой пользователь может читать/писать конфиг
+
+- MEDIUM (755, 644): любой пользователь может читать конфиг
+
+- Рекомендация: `chmod 600` для конфигов с секретами, `chmod 640` для остальных
+
 ## Структура проекта
 
 ```text
@@ -119,6 +137,8 @@ vul_parser/
 │   │   └── checker.go                  # Движок проверки
 │   ├── output/
 │   │   └── printer.go                  # Вывод результатов
+│   ├── permission/
+│   │   └── checker.go             # Проверка прав доступа
 |   |
 │   └── test-configs                    # Готовые конфиги для тестирования
 │       ├── all_vulnerabilites.json     # Конфиг со всеми уязвимостями
