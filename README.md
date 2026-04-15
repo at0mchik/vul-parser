@@ -82,13 +82,24 @@ cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 | `-s`, `--silent` |  Не выходить с ошибкой при наличии уязвимостей |
 | `--stdin` |	Читать конфигурацию из STDIN вместо файла |
 | `--rules` | Путь к файлу с кастомными правилами |
+| `-r`, `--recursive` |	Рекурсивный анализ директории |
 
-## Exit codes
+## Exit codes CLI-утилиты
 
 | Код | Описание |
 | --- | --- |
 | `0` | Уязвимости не найдены ИЛИ найдены но включен silent режим |
 | `1` | Найдены уязвимости (без silent) ИЛИ ошибка выполнения |
+
+## API Endpoints
+
+| Метод | Endpoint | Описание | 
+| --- | --- | --- | 
+| POST | `/api/analyze` | Анализ JSON конфига из тела запроса | 
+| POST | `/api/analyze/file?path=` | Анализ файла на сервере | 
+| GET | `/api/health` | Проверка состояния сервера | 
+
+Примеры запросов находятся вместе с примерами для CLI-утилиты
 
 ## Обнаруживаемые уязвимости
 
@@ -137,8 +148,10 @@ cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 ```text
 vul_parser/
 ├── cmd/
-│   └── vul_parser/
-│       └── main.go                # Точка входа
+│   ├── server/
+│   │   └── main.go                # Точка входа HTTP-сервера                
+│   └── parser/
+│       └── main.go                # Точка входа CLI-утилиты
 ├── internal/
 │   ├── domain/models
 │   │   ├── vulnerability.go       # Модель уязвимости
@@ -154,14 +167,31 @@ vul_parser/
 │   │   └── checker.go             # Движок проверки
 │   ├── output/
 │   │   └── printer.go             # Вывод результатов
-│   └── permission/
-│       └── checker.go             # Проверка прав доступа
-|   
+│   ├── permission/
+│   │   └── checker.go             # Проверка прав доступа
+|   |
+│   ├── handler/                   # Слой хендлеров
+│   │   ├── analyze.go             
+│   │   └── handler.go 
+│   └── service/                   # Слой сервисов
+│       ├── analyze_service.go     
+│       └── service.go 
+├── pkg                            # Допонительные пакеты
+|   └── server/                    # Пакет для запуска сервера
+│       └── server.go  
+|
+├── docker 
+|   ├── Dockerfile.hmr              # Докерфайл сервиса
+|   └── docker-compose-hmr.yml      # Докер композ для сервиса 
+|
 ├── test-configs                    # Готовые конфиги для тестирования
 │   ├── all_vulnerabilites.json     # Конфиг со всеми уязвимостями
 │   ├── edge_cases.json             # Конфиг с граничными случаями
 |   ├── no_vulnerabilites.json      # Конфиг без уязвимостей
 |   └── partial_vulnerabilites.yaml # Конфиг формата YAML
+|
+├── .air.toml     # Конфигурация .air для hot-reload контейнера
+├── .env          # Переменные окружения
 ├── go.mod
 ├── go.sum
 └── README.md
@@ -212,7 +242,28 @@ rules:
 | `and_value_not_empty` | Значение не должно быть пустым | 
 | `exclude_value_regex` | Исключить значения, подходящие под regex | 
 
-## Примеры
+## Примеры HTTP-сервера
+
+```bash
+# Анализ конфига
+curl -X POST http://localhost:8080/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"config": {"debug": true, "password": "secret"}}'
+
+# Анализ с кастомными правилами
+curl -X POST http://localhost:8080/api/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"config": {...}, "rules": {...}}'
+
+# Анализ файла
+curl -X POST "http://localhost:8080/api/analyze/file?path=./test-configs/edge_cases.json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "check_permissions": true
+  }'
+```
+
+## Примеры CLI-утилиты
 
 ### Конфигурация `test-configs/all_vulnerabilities.json`
 
