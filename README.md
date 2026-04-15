@@ -65,6 +65,7 @@ cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 | `-s`, `--silent` |  Не выходить с ошибкой при наличии уязвимостей |
 | `--stdin` |	Читать конфигурацию из STDIN вместо файла |
 | `--rules` | Путь к файлу с кастомными правилами |
+| `-r`, `--recursive` |	Рекурсивный анализ директории |
 
 ## Exit codes
 
