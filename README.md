@@ -60,7 +60,7 @@ go build -o vul_server ./cmd/server
 ./vul_server
 ```
 
-## Установка, билд и запуск сервера с использованием докера
+## Установка, билд и запуск сервера с использованием docker и docker-compose
 
 ```bash
 git clone https://github.com/at0mchik/vul-parser
