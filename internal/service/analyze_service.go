@@ -13,23 +13,23 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type AnalysisService struct {
+type AnalysisHTTPService struct {
 	defaultRules []models.Rule
 }
 
-func NewAnalysisService() *AnalysisService {
+func NewAnalysisHTTPService() *AnalysisHTTPService {
 	defaultRules, err := rules.LoadRules("")
 	if err != nil {
 		logrus.Errorf("failed to load default rules: %v", err)
 		return nil
 	}
 
-	return &AnalysisService{
+	return &AnalysisHTTPService{
 		defaultRules: defaultRules,
 	}
 }
 
-func (s *AnalysisService) Analyze(req *dto.AnalyzeRequest) (*dto.AnalyzeResponse, error) {
+func (s *AnalysisHTTPService) Analyze(req *dto.AnalyzeRequest) (*dto.AnalyzeResponse, error) {
 	var rulesList []models.Rule
 	var err error
 
@@ -87,7 +87,7 @@ func (s *AnalysisService) Analyze(req *dto.AnalyzeRequest) (*dto.AnalyzeResponse
 	return response, nil
 }
 
-func (s *AnalysisService) AnalyzeWithFile(filePath string, req *dto.AnalyzeRequest) (*dto.AnalyzeResponse, error) {
+func (s *AnalysisHTTPService) AnalyzeWithFile(filePath string, req *dto.AnalyzeRequest) (*dto.AnalyzeResponse, error) {
 	var rulesList []models.Rule
 	var err error
 
@@ -159,7 +159,7 @@ func (s *AnalysisService) AnalyzeWithFile(filePath string, req *dto.AnalyzeReque
 	return response, nil
 }
 
-func (s *AnalysisService) loadRulesFromJSON(data []byte) ([]models.Rule, error) {
+func (s *AnalysisHTTPService) loadRulesFromJSON(data []byte) ([]models.Rule, error) {
 	var ruleSet struct {
 		Rules []struct {
 			ID             string `json:"id"`

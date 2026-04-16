@@ -25,6 +25,15 @@
 - Контейнеризация (Docker)
 - Hot reload для разработки (Air)
 
+### gRPC сервер
+- Высокопроизводительный RPC API для анализа конфигураций
+- Поддержка protobuf протокола (версия 3)
+- Анализ конфига через gRPC метод (`AnalyzerService/Analyze`)
+- Анализ файла на сервере (`AnalyzerService/AnalyzeFile`)
+- Кастомные правила в виде `google.protobuf.Struct`
+- Health check метод (`AnalyzerService/Health`)
+- Контейнеризация (Docker) с hot reload
+
 ### Обнаруживаемые уязвимости
 
 | Уязвимость | Уровень | Описание |
@@ -51,7 +60,7 @@ cd vul-parser
 go build -o vul_parser ./cmd/parser
 ```
 
-## Установка, билд и запуск сервера
+## Установка, билд и запуск http сервиса
 
 ```bash
 git clone https://github.com/at0mchik/vul-parser
@@ -60,12 +69,30 @@ go build -o vul_server ./cmd/server
 ./vul_server
 ```
 
-## Установка, билд и запуск сервера с использованием docker и docker-compose
+## Установка, билд и запуск grpc сервиса
 
 ```bash
 git clone https://github.com/at0mchik/vul-parser
 cd vul-parser
-docker-compose -f docker/docker-compose-hmr.yml up -d   
+go build -o vul_grpc ./cmd/grpc
+./vul_grpc
+```
+
+## Установка, билд и запуск http и grpc сервисов с использованием docker и docker-compose
+
+```bash
+git clone https://github.com/at0mchik/vul-parser
+cd vul-parser
+docker-compose -f docker/docker-compose.yml up -d   
+```
+
+## .env файл
+
+Для запуска сервисов необходимо создать .env файл с таким содержимым:
+
+```.env
+HTTP_SERVER_PORT=8080
+GRPC_SERVER_PORT=9054
 ```
 
 ## Использование CLI-утилиты
@@ -121,7 +148,7 @@ cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 | `0` | Уязвимости не найдены ИЛИ найдены но включен silent режим |
 | `1` | Найдены уязвимости (без silent) ИЛИ ошибка выполнения |
 
-## API Endpoints
+## HTTP API Endpoints
 
 | Метод | Endpoint | Описание | 
 | --- | --- | --- | 
@@ -129,7 +156,17 @@ cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 | POST | `/api/analyze/file?path=` | Анализ файла на сервере | 
 | GET | `/api/health` | Проверка состояния сервера | 
 
-Примеры запросов находятся вместе с примерами для CLI-утилиты
+Примеры запросов находятся ниже
+
+### gRPC API методы
+
+| Метод | Описание |
+|-------|----------|
+| `AnalyzerService/Analyze` | Анализ конфига из запроса |
+| `AnalyzerService/AnalyzeFile` | Анализ файла на сервере |
+| `AnalyzerService/Health` | Проверка состояния сервера |
+
+Примеры запросов находятся ниже
 
 ## Обнаруживаемые уязвимости
 
@@ -178,14 +215,24 @@ cat config.json | ./vul_parser --stdin -s --rules custom.yaml
 ```text
 vul_parser/
 ├── cmd/
+│   ├── grpc/
+│   │   └── main.go                # Точка входа gRPC-сервиса 
 │   ├── server/
-│   │   └── main.go                # Точка входа HTTP-сервера                
+│   │   └── main.go                # Точка входа HTTP-сервиса                
 │   └── parser/
 │       └── main.go                # Точка входа CLI-утилиты
+├── gen/                           # Сгенерированные файлы по proto-контракту
+│   └── proto/
+│       └── analyzer/
+│           ├── analyzer.pb.go
+│           └── analyzer_grpc.pb.go
 ├── internal/
-│   ├── domain/models
-│   │   ├── vulnerability.go       # Модель уязвимости
-│   │   └── rule.go                # Модель правила
+│   ├── domain/
+│   │   ├── dto/
+│   │   │   └── dto.go             # Модели для http-сервиса
+│   │   └── models/
+│   │       ├── rules.go           # Модель правила
+│   │       └── vulnerability.go   # Модель уязвимости
 │   ├── config/
 │   │   └── flags.go               # Парсинг флагов
 │   ├── rules/
@@ -201,18 +248,23 @@ vul_parser/
 │   │   └── checker.go             # Проверка прав доступа
 |   |
 │   ├── handler/                   # Слой хендлеров
-│   │   ├── analyze.go             
-│   │   └── handler.go 
+│   │   ├── analyze_grpc.go
+│   │   ├── analyze_http.go
+│   │   ├── handler_grpc.go
+│   │   └── handler_http.go
 │   └── service/                   # Слой сервисов
+│       ├── analyze_grpc_service.go
 │       ├── analyze_service.go     
 │       └── service.go 
 ├── pkg                            # Допонительные пакеты
-|   └── server/                    # Пакет для запуска сервера
-│       └── server.go  
+|   └── server/                    # Пакет для запуска серверов
+│       ├── grpc_server.go
+│       └── http_server.go 
 |
 ├── docker 
-|   ├── Dockerfile.hmr              # Докерфайл сервиса
-|   └── docker-compose-hmr.yml      # Докер композ для сервиса 
+│   ├── Dockerfile.grpc             # Докерфайл gRPC сервиса
+|   ├── Dockerfile                  # Докерфайл http сервиса
+|   └── docker-compose.yml          # Докер композ для сервисов
 |
 ├── test-configs                    # Готовые конфиги для тестирования
 │   ├── all_vulnerabilites.json     # Конфиг со всеми уязвимостями
@@ -220,8 +272,9 @@ vul_parser/
 |   ├── no_vulnerabilites.json      # Конфиг без уязвимостей
 |   └── partial_vulnerabilites.yaml # Конфиг формата YAML
 |
-├── .air.toml     # Конфигурация .air для hot-reload контейнера
-├── .env          # Переменные окружения
+├── .air.toml           # Конфигурация .air для hot-reload контейнера http
+├── .air.grpc.toml      # Конфигурация .air для hot-reload контейнера gRPC
+├── .env                # Переменные окружения
 ├── go.mod
 ├── go.sum
 └── README.md
@@ -272,25 +325,144 @@ rules:
 | `and_value_not_empty` | Значение не должно быть пустым | 
 | `exclude_value_regex` | Исключить значения, подходящие под regex | 
 
-## Примеры HTTP-сервера
+## Примеры запросов для HTTP-сервиса
 
 ```bash
-# Анализ конфига
+# Health check
+curl -X GET http://localhost:8080/api/health
+
+# Анализ конфига с уязвимостями
 curl -X POST http://localhost:8080/api/analyze \
   -H "Content-Type: application/json" \
-  -d '{"config": {"debug": true, "password": "secret"}}'
+  -d '{
+    "config": {
+      "debug": true,
+      "password": "secret"
+    }
+  }'
 
-# Анализ с кастомными правилами
+# Анализ конфига с кастомными правилами
 curl -X POST http://localhost:8080/api/analyze \
   -H "Content-Type: application/json" \
-  -d '{"config": {...}, "rules": {...}}'
+  -d '{
+    "config": {
+      "debug": true,
+      "app": {
+        "mode": "production"
+      }
+    },
+    "rules": {
+      "rules": [
+        {
+          "id": "custom_debug_check",
+          "name": "Debug mode enabled",
+          "severity": "HIGH",
+          "description": "Debug mode is enabled",
+          "recommendation": "Disable debug mode in production",
+          "conditions": [
+            {
+              "path": "$.debug",
+              "operator": "eq",
+              "value": true
+            }
+          ]
+        }
+      ]
+    }
+  }'
 
-# Анализ файла
+# Анализ файла на сервере
 curl -X POST "http://localhost:8080/api/analyze/file?path=./test-configs/edge_cases.json" \
   -H "Content-Type: application/json" \
   -d '{
     "check_permissions": true
   }'
+
+# Анализ файла с кастомными правилами
+curl -X POST "http://localhost:8080/api/analyze/file?path=./test-configs/config.json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "rules": {
+      "rules": [
+        {
+          "id": "file_permission_check",
+          "name": "Strict permissions required",
+          "severity": "MEDIUM",
+          "description": "File permissions too broad",
+          "recommendation": "Run chmod 600",
+          "conditions": []
+        }
+      ]
+    },
+    "check_permissions": true
+  }'
+```
+
+## Примеры запросов для gRPC-сервиса
+
+```bash
+# Health check
+grpcurl -plaintext localhost:9054 analyzer.AnalyzerService/Health
+
+# Анализ конфига с уязвимостями
+grpcurl -plaintext -d '{
+  "config": {
+    "debug": true,
+    "password": "secret"
+  }
+}' localhost:9054 analyzer.AnalyzerService/Analyze
+
+# Анализ конфига с кастомными правилами
+grpcurl -plaintext -d '{
+  "config": {
+    "debug": true,
+    "app": {
+      "mode": "production"
+    }
+  },
+  "rules": {
+    "rules": [
+      {
+        "id": "custom_debug_check",
+        "name": "Debug mode enabled",
+        "severity": "HIGH",
+        "description": "Debug mode is enabled",
+        "recommendation": "Disable debug mode in production",
+        "conditions": [
+          {
+            "path": "$.debug",
+            "operator": "eq",
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}' localhost:9054 analyzer.AnalyzerService/Analyze
+
+# Анализ файла на сервере
+grpcurl -plaintext -d '{
+  "file_path": "./test-configs/edge_cases.json",
+  "check_permissions": true
+}' localhost:9054 analyzer.AnalyzerService/AnalyzeFile
+
+# Анализ файла с кастомными правилами
+grpcurl -plaintext -d '{
+  "file_path": "./test-configs/config.json",
+  "rules": {
+    "rules": [
+      {
+        "id": "file_permission_check",
+        "name": "Strict permissions required",
+        "severity": "MEDIUM",
+        "description": "File permissions too broad",
+        "recommendation": "Run chmod 600",
+        "conditions": []
+      }
+    ]
+  },
+  "check_permissions": true
+}' localhost:9054 analyzer.AnalyzerService/AnalyzeFile
 ```
 
 ## Примеры CLI-утилиты

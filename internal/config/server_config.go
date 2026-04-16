@@ -11,7 +11,8 @@ import (
 
 type ServerConfig struct {
 	Server struct {
-		Port     string
+		HttpPort string
+		GRPCPort string
 	}
 }
 
@@ -27,7 +28,8 @@ func GetServerConfig() *ServerConfig {
 			logrus.Fatalf("error loading env variables: %s", err.Error())
 		}
 
-		instance.Server.Port = getEnv("SERVER_PORT", "8080")
+		instance.Server.HttpPort = getEnv("HTTP_SERVER_PORT", "8080")
+		instance.Server.GRPCPort = getEnv("GRPC_SERVER_PORT", "9054")
 	})
 
 	return instance
