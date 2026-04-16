@@ -9,7 +9,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-//go:embed builtin.yaml
 var builtinRulesData []byte
 
 type yamlRule struct {

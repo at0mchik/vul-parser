@@ -1,0 +1,28 @@
+services:
+  analyze_service_http:
+    container_name: analyze_service_http
+    build:
+      dockerfile: ./docker/Dockerfile
+      context: ../
+      target: "development"
+    volumes:
+      - ../:/app
+    ports:
+      - "8080:8080"
+    environment:
+      TZ: Europe/Moscow
+      PORT: "8080"
+
+  analyze_service_grpc:
+    container_name: analyze_service_grpc
+    build:
+      dockerfile: ./docker/Dockerfile.grpc
+      context: ../
+      target: "development"
+    volumes:
+      - ../:/app
+    ports:
+      - "9054:9054"
+    environment:
+      TZ: Europe/Moscow
+      GRPC_PORT: "9054"

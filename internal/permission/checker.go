@@ -23,7 +23,6 @@ func (p *PermissionChecker) CheckFile(filePath string) *models.FilePermission {
 	mode := info.Mode()
 	perm := mode.Perm()
 	
-	// Проверка слишком широких прав
 	if perm&0077 != 0 {
 		permStr := fmt.Sprintf("%o", perm)
 		var recommended string

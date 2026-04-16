@@ -48,7 +48,6 @@ func parseYAML(data []byte) (interface{}, error) {
 func ReadFromReader(r io.Reader) ([]byte, error) {
 	stat, _ := os.Stdin.Stat()
 	
-	// Проверяем, является ли stdin терминалом (интерактивный режим)
 	if (stat.Mode() & os.ModeCharDevice) != 0 {
 		fmt.Fprintln(os.Stderr, "Введите конфигурацию (нажмите Ctrl+D на пустой строке для окончания ввода):")
 		
@@ -69,7 +68,6 @@ func ReadFromReader(r io.Reader) ([]byte, error) {
 		return []byte(strings.Join(lines, "\n")), nil
 	}
 	
-	// Неинтерактивный режим (pipe или redirection)
 	return io.ReadAll(r)
 }
 

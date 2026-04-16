@@ -11,14 +11,14 @@ import (
 
 type ServerConfig struct {
 	Server struct {
-		Port     string
+		HttpPort string
+		GRPCPort string
 	}
 }
 
 var instance *ServerConfig
 var once sync.Once
 
-// GetServerConfig - функция для получения конфига по "аппаратной части", доступы к бд, порты и тд
 func GetServerConfig() *ServerConfig {
 	once.Do(func() {
 		instance = &ServerConfig{}
@@ -27,7 +27,8 @@ func GetServerConfig() *ServerConfig {
 			logrus.Fatalf("error loading env variables: %s", err.Error())
 		}
 
-		instance.Server.Port = getEnv("SERVER_PORT", "8080")
+		instance.Server.HttpPort = getEnv("HTTP_SERVER_PORT", "8080")
+		instance.Server.GRPCPort = getEnv("GRPC_SERVER_PORT", "9054")
 	})
 
 	return instance

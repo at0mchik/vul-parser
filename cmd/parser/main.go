@@ -57,7 +57,6 @@ func main() {
 		}
 		
 		if info.IsDir() {
-			// Рекурсивный анализ директории
 			err := filepath.Walk(cfg.FilePath, func(path string, info os.FileInfo, err error) error {
 				if err != nil {
 					return nil
@@ -75,12 +74,10 @@ func main() {
 					return nil
 				}
 				
-				// Проверка прав доступа
 				if perm := permChecker.CheckFile(path); perm != nil {
 					allPermissions = append(allPermissions, *perm)
 				}
 				
-				// Анализ конфига
 				configData, err := os.ReadFile(path)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Warning: cannot read %s: %v\n", path, err)
@@ -104,7 +101,6 @@ func main() {
 				os.Exit(1)
 			}
 		} else {
-			// Одиночный файл
 			if perm := permChecker.CheckFile(cfg.FilePath); perm != nil {
 				allPermissions = append(allPermissions, *perm)
 			}

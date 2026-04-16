@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package analyzer;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "vul-parser/gen/proto;analyzer";
+
+service AnalyzerService {
+  rpc Analyze(AnalyzeRequest) returns (AnalyzeResponse);
+  rpc AnalyzeFile(AnalyzeFileRequest) returns (AnalyzeResponse);
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message AnalyzeRequest {
+  google.protobuf.Struct config = 1;   
+  google.protobuf.Struct rules = 2;    
+  bool check_permissions = 3;
+}
+
+message AnalyzeFileRequest {
+  string file_path = 1;
+  google.protobuf.Struct rules = 2;    
+  bool check_permissions = 3;
+}
+
+message Vulnerability {
+  string rule_id = 1;
+  string severity = 2;
+  string description = 3;
+  string recommendation = 4;
+  string path = 5;
+  string value = 6;
+  string file_path = 7;
+}
+
+message Permission {
+  string file_path = 1;
+  string permission = 2;
+  string recommended = 3;
+  string severity = 4;
+  string description = 5;
+}
+
+message AnalyzeResponse {
+  repeated Vulnerability vulnerabilities = 1;
+  repeated Permission permissions = 2;
+  int32 total_count = 3;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  string status = 1;
+  string version = 2;
+}
