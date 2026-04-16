@@ -32,4 +32,4 @@ debug.test
 
 *.log
 
-tmp
+tmp/
